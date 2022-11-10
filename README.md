@@ -12,9 +12,14 @@ source /envName/bin/activate
 cd envName
 pip install gym
 pip install wandb
+brew install ffmpeg
+git clone https://github.com/fwd370/maCombat
 git clone https://github.com/koulanurag/ma-gym.git
 cd ma-gym
 pip install -e .
 ```
+
+
+
 ## Acknowledgement:
 - This project was based off [ma-gym](https://github.com/koulanurag/ma-gym) environment developed by Anurag Koul 
