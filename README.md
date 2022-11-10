@@ -11,6 +11,7 @@ Activate your environment and install necessary environments
 ```bash
 source /envName/bin/activate
 cd envName
+pip install torch
 pip install gym
 pip install wandb
 brew install ffmpeg
