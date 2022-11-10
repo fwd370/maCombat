@@ -57,7 +57,7 @@ nohup sh foo.sh &
 ## Testing and recording a saved model:
 ```bash
 source /envName/bin/activate
-python testAndRecordModel.py --model "model.py"
+python testAndRecordModel.py --model "model.pt"
 ```
 
 ## Acknowledgement:
