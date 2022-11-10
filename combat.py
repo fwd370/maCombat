@@ -466,7 +466,8 @@ class Combat(gym.Env):
                 if self._agent_cool_step[agent_i] == 0 and not self._agent_cool[agent_i]:
                     self._agent_cool[agent_i] = True
 
-        opp_action = self.opps_action
+        #opp_action = self.opps_action
+        opp_action = [4,4,4,4,4]
         for opp_i, action in enumerate(opp_action):
             if self.opp_health[opp_i] > 0:
                 target_agent = action - 5
