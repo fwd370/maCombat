@@ -16,4 +16,5 @@ git clone https://github.com/koulanurag/ma-gym.git
 cd ma-gym
 pip install -e .
 ```
-
+## Acknowledgement:
+- This project was based off [ma-gym](https://github.com/koulanurag/ma-gym) environment developed by Anurag Koul 
