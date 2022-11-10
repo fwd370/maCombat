@@ -11,7 +11,7 @@ Activate your environment and install necessary environments
 ```bash
 source /envName/bin/activate
 cd envName
-pip install torch
+pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
 pip install gym
 pip install wandb
 brew install ffmpeg
