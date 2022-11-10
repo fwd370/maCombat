@@ -157,15 +157,14 @@ def main(env_name, lr, gamma, batch_size, buffer_limit, log_interval, max_episod
     score = 0
     for episode_i in range(max_episodes):
         for param_group in optimizer.param_groups:
-            if episode_i <500:
-                param_group['lr'] = 0.0003
-                #param_group['lr'] = max(0.0001, lr/6*((max_episodes-episode_i)/max_episodes))
-            elif episode_i < 1500:
-                param_group['lr'] = 0.00015
-            elif episode_i < 3500:
-                param_group['lr'] = 0.0001
+            if episode_i < max_episodes/10:
+                param_group['lr'] = lr
+            elif episode_i < max_episodes/3:
+                param_group['lr'] = lr/2
+            elif episode_i < max_episodes/1.5:
+                param_group['lr'] = lr/3
             else:
-                param_group['lr'] = 0.00005
+                param_group['lr'] = lr/6
         if episode_i%1000 == 0:
             print(param_group['lr'])
         epsilon = max(min_epsilon, max_epsilon - (max_epsilon - min_epsilon) * (episode_i / (0.7 * max_episodes)))
@@ -215,32 +214,37 @@ if __name__ == '__main__':
     parser.add_argument('--gamma', type=float, default=0.70, required=False)
     parser.add_argument('--member', type=str, required=True)
     parser.add_argument('--run', type=int,required=True)
+    parser.add_argument('--max-epsilon', type=float, default=0.9, required=False)
+    parser.add_argument('--batch-size', type=int, default=64, required=False)
+    parser.add_argument('--chunk-size', type=int, default=15, required=False)
+    parser.add_argument('--target-interval', type=int, default=50, required=False)
+    parser.add_argument('--lr',type=float,default=0.0001, required=False)
 
     # Process arguments
     args = parser.parse_args()
     script_path = os.path.dirname(os.path.realpath(__file__))
     model_path = os.path.join(script_path, f'{args.gamma}_gamma_{args.member}_v{args.run}_recurrent_{str(not args.no_recurrent)}.pt')
     kwargs = {'env_name': args.env_name,
-              'lr': 0.01,
-              'batch_size': 64,
+              'lr': args.lr,
+              'batch_size': args.batch_size,
               'gamma': args.gamma,
               'buffer_limit': 50000,
-              'update_target_interval': 20,
+              'update_target_interval': args.target_interval,
               'log_interval': 100,
               'max_episodes': args.max_episodes,
-              'max_epsilon': 0.9,
+              'max_epsilon': args.max_epsilon,
               'min_epsilon': 0.1,
               'test_episodes': 5,
               'warm_up_steps': 2000,
               'update_iter': 10,
-              'chunk_size': 20,  # if not recurrent, internally, we use chunk_size of 1 and no gru cell is used.
+              'chunk_size': args.chunk_size,  # if not recurrent, internally, we use chunk_size of 1 and no gru cell is used.
               'recurrent': not args.no_recurrent,
               'train_seed':args.seed}
 
     if USE_WANDB:
         import wandb
 
-        wandb.init(project='minimal-marl', config={'algo': 'vdn', **kwargs})
+        wandb.init(project='minimal-marl', config={'algo': 'vdn_noop', **kwargs})
 
     main(**kwargs)
     
