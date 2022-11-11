@@ -224,7 +224,7 @@ if __name__ == '__main__':
     # Process arguments
     args = parser.parse_args()
     script_path = os.path.dirname(os.path.realpath(__file__))
-    model_path = os.path.join(script_path, f'{args.gamma}_gamma_{args.member}_v{args.run}_recurrent_{str(not args.no_recurrent)}.pt')
+    model_path = os.path.join(script_path, f'{args.member}_v{args.run}_{args.gamma}_gamma_recurrent_{str(not args.no_recurrent)}.pt')
     kwargs = {'env_name': args.env_name,
               'lr': args.lr,
               'batch_size': args.batch_size,
