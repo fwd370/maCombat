@@ -219,7 +219,8 @@ if __name__ == '__main__':
     parser.add_argument('--chunk-size', type=int, default=15, required=False)
     parser.add_argument('--target-interval', type=int, default=50, required=False)
     parser.add_argument('--lr',type=float,default=0.0001, required=False)
-
+    parser.add_argument('--min-epsilon', type=float, default=0.1, required=False)
+    
     # Process arguments
     args = parser.parse_args()
     script_path = os.path.dirname(os.path.realpath(__file__))
@@ -233,7 +234,7 @@ if __name__ == '__main__':
               'log_interval': 100,
               'max_episodes': args.max_episodes,
               'max_epsilon': args.max_epsilon,
-              'min_epsilon': 0.1,
+              'min_epsilon': args.min_epsilon,
               'test_episodes': 5,
               'warm_up_steps': 2000,
               'update_iter': 10,
