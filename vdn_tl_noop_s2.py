@@ -143,7 +143,7 @@ def get_model(model_path):
 
 # Can tweak the lr. We might need the LR decreasing method.
 def main(env_name, lr, gamma, batch_size, buffer_limit, log_interval, max_episodes, max_epsilon, min_epsilon,
-         test_episodes, warm_up_steps, update_iter, chunk_size, update_target_interval, recurrent, train_seed):
+        test_episodes, warm_up_steps, update_iter, chunk_size, update_target_interval, recurrent, train_seed, possible_init):
 
     # create env.
     
@@ -162,22 +162,21 @@ def main(env_name, lr, gamma, batch_size, buffer_limit, log_interval, max_episod
     score = 0
     for episode_i in range(max_episodes):
         for param_group in optimizer.param_groups:
-            if episode_i <500:
-                param_group['lr'] = 0.00015
-                #param_group['lr'] = max(0.0001, lr/6*((max_episodes-episode_i)/max_episodes))
-            elif episode_i < 1500:
-                param_group['lr'] = 0.0001
-            elif episode_i < 3500:
-                param_group['lr'] = 0.00005
+            if episode_i < max_episodes/10:
+                param_group['lr'] = lr
+            elif episode_i < max_episodes/3:
+                param_group['lr'] = lr/2
+            elif episode_i < max_episodes/1.5:
+                param_group['lr'] = lr/3
             else:
-                param_group['lr'] = 0.00002
+                param_group['lr'] = lr/6
         if episode_i%1000 == 0:
             print(param_group['lr'])
         epsilon = max(min_epsilon, max_epsilon - (max_epsilon - min_epsilon) * (episode_i / (0.7 * max_episodes)))
         if train_seed > -1:
             env.seed(train_seed)
         elif train_seed == -2:
-            env.seed(np.random.randint(0,10))
+            env.seed(np.random.randint(0,possible_init))
         state = env.reset()
         done = [False for _ in range(env.n_agents)]
         with torch.no_grad():
@@ -225,6 +224,10 @@ if __name__ == '__main__':
     parser.add_argument('--max-epsilon', type=float, default=0.5, required=False)
     parser.add_argument('--batch-size', type=int, default=64, required=False)
     parser.add_argument('--chunk-size', type=int, default=20, required=False)
+    parser.add_argument('--target-interval', type=int, default=50, required=False)
+    parser.add_argument('--min-epsilon', type=float, default=0.1, required=False)
+    parser.add_argument('--lr', type=float, default=0.0001, required=False)
+    parser.add_argument('--n-init', type=int, default=500, required=False)
     
     # Process arguments
     args = parser.parse_args()
@@ -232,26 +235,27 @@ if __name__ == '__main__':
     model_path = os.path.join(script_path, f'{args.gamma}_gamma_{args.member}_v{args.run}_recurrent_{str(not args.no_recurrent)}.pt')
     load_model_path = os.path.join(script_path,'models/0.9_gamma_wd_v145_recurrent_True.pt')
     kwargs = {'env_name': args.env_name,
-              'lr': 0.01,
+              'lr': args.lr,
               'batch_size': args.batch_size,
               'gamma': args.gamma,
               'buffer_limit': 50000,
-              'update_target_interval': 20,
+              'update_target_interval': args.target_interval,
               'log_interval': 100,
               'max_episodes': args.max_episodes,
               'max_epsilon': args.max_epsilon,
-              'min_epsilon': 0.1,
+              'min_epsilon': args.min_epsilon,
               'test_episodes': 5,
               'warm_up_steps': 2000,
               'update_iter': 10,
               'chunk_size': args.chunk_size,  # if not recurrent, internally, we use chunk_size of 1 and no gru cell is used.
               'recurrent': not args.no_recurrent,
-              'train_seed':args.seed}
+              'train_seed':args.seed,
+              'possible_init':args.n_init}
 
     if USE_WANDB:
         import wandb
 
-        wandb.init(project='minimal-marl', config={'algo': 'vdn', **kwargs})
+        wandb.init(project='minimal-marl', config={'algo': 'vdn_tl_noop', **kwargs})
 
     main(**kwargs)
     
